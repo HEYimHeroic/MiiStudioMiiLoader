@@ -11,3 +11,5 @@ Once there, head to Nintendo's official Mii Studio site. (You may have to enter 
 Click on a Mii, click "Edit", and click the bookmark you just made. (Make sure that you're not making a new Mii. If you are, save the new Mii, and go back to edit it again.)
 
 Follow the instructions given to you in the popup box's prompt.
+
+You can read more about the specifics on using the tool at the Mii Library: https://sites.google.com/view/miilibrary/FAQ?authuser=0#h.pf4lefk6peji
