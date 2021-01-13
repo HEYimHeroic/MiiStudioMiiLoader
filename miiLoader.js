@@ -1,14 +1,19 @@
-(function () {
-  const urlre = /^https:\/\/studio\.mii\.nintendo\.com\/miis\/([0-9a-f]*)\/edit\?client_id=([0-9a-f]*)/;
-  const res = urlre.exec(window.location.href);
-  if (!res || res.length < 2) {
-    alert(
-      "This page isn't the correct page. Please edit the Mii you'd like to download and run this script again."
-    );
-    return;
+(() => {
+  const urlRegex = /^https:\/\/studio\.mii\.nintendo\.com\/miis\/([0-9a-f]*)\/edit\?client_id=([0-9a-f]*)/;
+
+  const regexResults = urlRegex.exec(window.location.href);
+
+  if (!regexResults || regexResults.length < 2) {
+    const errorMessage =
+      "This page isn't the correct page. Please edit the Mii you'd like to download and run this script again.";
+
+    alert(errorMessage);
+    throw new Error(errorMessage);
   }
-  const miiID = res[1];
-  const clientID = res[2];
+
+  const miiID = regexResults[1];
+  const clientID = regexResults[2];
+
   const storageURL = `https%3A%2F%2Fstudio.mii.nintendo.com%2Fmiis%2F${miiID}%2Fedit%3Fclient_id%3D${clientID}`;
 
   const setOrExtractData = confirm(
