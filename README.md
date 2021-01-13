@@ -2,7 +2,8 @@
 
 Import and export Miis from Nintendo's online Mii Studio, using Mii Studio codes.
 
-Code was originally written by me, HEYimHeroic. Polished by bendevnull.
+Code was originally written by me, HEYimHeroic.
+Polished by [bendevnull](https://github.com/bendevnull) and [AlejandroAkbal](https://github.com/AlejandroAkbal).
 
 ## Instructions
 
