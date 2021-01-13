@@ -2,9 +2,6 @@
 
 Import and export Miis from Nintendo's online Mii Studio, using Mii Studio codes.
 
-Code was originally written by me, HEYimHeroic.
-Polished by [bendevnull](https://github.com/bendevnull) and [AlejandroAkbal](https://github.com/AlejandroAkbal).
-
 ## Instructions
 
 Make a new bookmark, and paste the following JavaScript code into the URL section of the bookmark:
@@ -24,3 +21,8 @@ Click on a Mii, click _"Edit"_, and click the bookmark you just made.
 Follow the instructions given to you in the popup box's prompt.
 
 You can read more about the specifics on using the tool at the [Mii Library](https://sites.google.com/view/miilibrary/FAQ#h.pf4lefk6peji).
+
+## Credit
+
+Code was originally written by me, HEYimHeroic.
+Polished by [bendevnull](https://github.com/bendevnull) and [AlejandroAkbal](https://github.com/AlejandroAkbal).
