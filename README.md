@@ -7,8 +7,11 @@ Polished by [bendevnull](https://github.com/bendevnull) and [AlejandroAkbal](htt
 
 ## Instructions
 
-Make a new bookmark, and paste the following JavaScript code into the URL section of the bookmark: `javascript:(function () {var s = document.createElement('script');s.setAttribute('src', 'https://heyimheroic.github.io/MiiStudioMiiLoader/miiLoader.js');document.body.appendChild(s);}());`
+Make a new bookmark, and paste the following JavaScript code into the URL section of the bookmark:
 
+```js
+javascript:(function(){var s=document.createElement("script");s.setAttribute("src","https://heyimheroic.github.io/MiiStudioMiiLoader/miiLoader.js"),document.body.appendChild(s)})();
+```
 
 Once there, head to Nintendo's official Mii Studio site.
 
