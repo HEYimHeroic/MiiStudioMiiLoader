@@ -13,4 +13,4 @@ Click on a Mii, click "Edit", and click the bookmark you just made. (Make sure t
 
 Follow the instructions given to you in the popup box's prompt.
 
-You can read more about the specifics on using the tool at the [Mii Library](https://sites.google.com/view/miilibrary/FAQ#h.pf4lefk6peji).
+You can read more about the specifics on using the tool at the [Mii Library](https://www.miilibrary.com/FAQ#h.pf4lefk6peji).
