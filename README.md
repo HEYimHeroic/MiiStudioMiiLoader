@@ -13,4 +13,6 @@ Click on a Mii, click "Edit", and click the bookmark you just made. (Make sure t
 
 Follow the instructions given to you in the popup box's prompt.
 
-You can read more about the specifics on using the tool at the [Mii Library](https://www.miilibrary.com/FAQ#h.pf4lefk6peji).
+If you are loading a Mii, refresh the page, and select the button to continue editing the Mii. The Mii will transform into the Mii you're attempting to load.
+
+You can read more about the specifics on using the tool at the [Mii Library](https://www.miilibrary.com/contactfaqother/FAQ#h.pf4lefk6peji).
