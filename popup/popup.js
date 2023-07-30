@@ -24,21 +24,22 @@ async function getCurrentTab() {
 
 async function getPageLocalStorage(key) {
 	const response = await chrome.scripting.executeScript({
+		args: [key],
 		target: {
 			tabId: currentTab.id
 		},
-		func: function() {
-			return JSON.stringify(localStorage);
+		func: function(key) {
+			return localStorage.getItem(key);
 		}
 	});
+
+	console.log(response);
 
 	if (!response[0] || !response[0].result) {
 		return;
 	}
 
-	const storage = JSON.parse(response[0].result);
-
-	return storage[key];
+	return response[0].result;
 }
 
 async function setPageLocalStorage(key, value) {
