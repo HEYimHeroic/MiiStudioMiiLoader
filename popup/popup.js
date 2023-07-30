@@ -33,8 +33,6 @@ async function getPageLocalStorage(key) {
 		}
 	});
 
-	console.log(response);
-
 	if (!response[0] || !response[0].result) {
 		return;
 	}
