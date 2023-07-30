@@ -1,9 +1,18 @@
 # Mii Studio Mii Loader
 Import and export Miis from Nintendo's online Mii Studio, using Mii Studio codes.
 
-Code was originally written by me, HEYimHeroic. Polished by [bendevnull](https://github.com/bendevnull).
+Code originally written by [HEYimHeroic](https://github.com/HEYimHeroic). Browser extension by [jonbarrow](https://github.com/jonbarrow). Bookmarklet polished by [bendevnull](https://github.com/bendevnull).
 
-# Instructions
+# Browser Extension (New!)
+Now the Mii Studio Mii Loader can be used through a regular browser extension. Head to Nintendo's [official Mii Studio site](https://my.nintendo.com/mii). (You may have to enter the site via the My Nintendo site first. Make sure you're signed into your My Nintendo account.) Make sure that you're not making a new Mii. If you are, save the new Mii, and go back to edit it again.
+
+Clicking on the extension with a Mii loaded will display its Mii Studio code, ready to be copied. If it doesn't work, make a change to the Mii (you can immediately change it back) and the Mii Studio code should be there. This should automatically update as you edit the Mii.
+
+To load a Mii Studio code, begin editing a Mii the same way as before, but now when clicking on the extension, enter a Mii Studio code into the textbox below it and click "Update Mii Studio Data". Then, refresh the page, and click "Continue editing" in the website for your Mii to appear. (Hitting "Start from scratch" will reset the process.)
+
+# Bookmarklet Instructions
+For those still unaware of the browser extension, or for one reason or another need to use the bookmarklet instead, the old bookmarklet version of the tool is still available. Below are the old instructions for that:
+
 Make a new bookmark, and paste the following JavaScript code into the URL section of the bookmark:
 `javascript:(function () {var s = document.createElement('script');s.setAttribute('src', 'https://heyimheroic.github.io/MiiStudioMiiLoader/miiLoader.js');document.body.appendChild(s);}());`
 
