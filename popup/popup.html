@@ -1,0 +1,29 @@
+<html>
+	<link rel="stylesheet" href="popup.css">
+	<body>
+		<div id="loading">
+			Checking env...
+		</div>
+		<div id="not-valid-url" class="hidden">
+			<h2>Please visit Mii Studio to continue</h2>
+		</div>
+		<div id="mii-studio" class="hidden">
+			<div id="no-mii-id-or-client-id" class="hidden">
+				<h2>Could not find Mii ID and/or client ID in the URL. Close and revist the page and try again</h2>
+			</div>
+			<div id="no-mii-data-warning" class="hidden">
+				<h2>Could not find Mii data in local storage. Make and revert an edit to your Mii and try again</h2>
+			</div>
+			<div class="content hidden">
+				<h2>Current Mii Data code</h2>
+				<h2>
+					<code id="mii-data"></code>
+				</h2>
+				<input type="text" id="new-mii-studio-data">
+				<br>
+				<button id="update-mii-studio-data">Update Mii Studio Data</button>
+			</div>
+		</div>
+		<script src="popup.js"></script>
+	</body>
+</html>
