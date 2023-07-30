@@ -1,0 +1,17 @@
+{
+	"manifest_version": 3,
+	"name": "Mii Studio Mii Loader",
+	"description": "Load and export Mii Studio codes",
+	"version": "1.0",
+	"permissions": ["storage", "activeTab", "scripting"],
+	"icons": {
+		"16": "images/heroic-16.png",
+		"32": "images/heroic-32.png",
+		"48": "images/heroic-48.png",
+		"128": "images/heroic-128.png"
+	},
+	"action": {
+		"default_popup": "popup/popup.html",
+		"default_icon": "images/heroic-128.png"
+	}
+}
