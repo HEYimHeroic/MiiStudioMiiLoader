@@ -42,7 +42,7 @@ async function getPageLocalStorage(key) {
 }
 
 async function setPageLocalStorage(key, value) {
-	const response = await chrome.scripting.executeScript({
+	await chrome.scripting.executeScript({
 		args: [key, value],
 		target: {
 			tabId: currentTab.id
