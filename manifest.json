@@ -15,7 +15,7 @@
 	"action": {
 		"default_popup": "popup/popup.html",
 		"default_icon": "images/icon-128.png"
-	}
+	},
     "content_scripts": {
         "matches": ["*://*.nintendo.com/*"]
     }
