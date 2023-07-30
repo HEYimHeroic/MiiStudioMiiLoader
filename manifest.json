@@ -1,17 +1,24 @@
 {
 	"manifest_version": 3,
 	"name": "Mii Studio Mii Loader",
-	"description": "Load and export Mii Studio codes",
+	"description": "Load and export Mii Studio codes on the Mii Studio website: https://my.nintendo.com/mii",
 	"version": "1.0",
+	"homepage_url": "https://github.com/HEYimHeroic/MiiStudioMiiLoader",
 	"permissions": ["storage", "activeTab", "scripting"],
 	"icons": {
-		"16": "images/heroic-16.png",
-		"32": "images/heroic-32.png",
-		"48": "images/heroic-48.png",
-		"128": "images/heroic-128.png"
+		"16": "images/icon-16.png",
+		"32": "images/icon-32.png",
+		"48": "images/icon-48.png",
+		"96": "images/icon-96.png",
+		"128": "images/icon-128.png"
 	},
 	"action": {
 		"default_popup": "popup/popup.html",
-		"default_icon": "images/heroic-128.png"
+		"default_icon": "images/icon-128.png"
 	}
+    "content_scripts": [
+      {
+        "matches": ["*://*.nintendo.com/*"]
+      }
+    ]
 }

@@ -10,6 +10,16 @@ Clicking on the extension with a Mii loaded will display its Mii Studio code, re
 
 To load a Mii Studio code, begin editing a Mii the same way as before, but now when clicking on the extension, enter a Mii Studio code into the textbox below it and click "Update Mii Studio Data". Then, refresh the page, and click "Continue editing" in the website for your Mii to appear. (Hitting "Start from scratch" will reset the process.)
 
+## Installing the Browser Extension
+
+To install this browser extension, follow these steps:
+1. Download the latest release of the Mii Studio Mii Loader browser extension. Unzip the download to a location you won't lose it, like an extensions folder.
+2. Go to your browser's extensions settings page. For example, on Google Chrome, the link is `chrome://extensions/`.
+3. Find the "Developer mode" option and enable it.
+4. Click the button to "Load unpacked extension" and navigate to the folder you unzipped (the contents should contain `manifest.json`, `/popup/`, and `/images/`). Choose this folder as the unpacked extension's location.
+
+The Mii Studio Mii Loader extension may come to official browser extension web stores soon!
+
 # Bookmarklet Instructions
 For those still unaware of the browser extension, or for one reason or another need to use the bookmarklet instead, the old bookmarklet version of the tool is still available. Below are the old instructions for that:
 
