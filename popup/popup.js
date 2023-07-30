@@ -48,7 +48,6 @@ async function setPageLocalStorage(key, value) {
 			tabId: currentTab.id
 		},
 		func: function(key, value) {
-			console.log(key, value);
 			localStorage.setItem(key, value);
 		}
 	});
