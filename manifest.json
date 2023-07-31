@@ -2,7 +2,7 @@
 	"manifest_version": 3,
 	"name": "Mii Studio Mii Loader",
 	"description": "Load and export Mii Studio codes on the Mii Studio website: https://my.nintendo.com/mii",
-	"version": "1.0",
+	"version": "1.0.2",
 	"homepage_url": "https://github.com/HEYimHeroic/MiiStudioMiiLoader",
 	"permissions": ["storage", "activeTab", "scripting"],
 	"icons": {
