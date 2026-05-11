@@ -23,6 +23,7 @@ let exportFormatOptions = [];
 const MII_STUDIO_URL_REGEX = /https:\/\/studio\.mii\.nintendo\.com\/miis\/([a-f0-9]{16})\/edit\?client_id=([a-f0-9]{16})/;
 const IS_HEX_REGEX = /^[a-f\d\s]+$/i;
 const IS_B64_REGEX = /^((([a-z\d+/]{4})*)([a-z\d+/]{4}|[a-z\d+/]{3}=|[a-z\d+/]{2}==))$/i;
+const QR_EXPORT_OPTIONS = { noRenderMii: true };
 
 let miijsPromise;
 
@@ -127,19 +128,19 @@ function triggerFileDownload(fileName, data, mimeType) {
 
 async function buildExportPayload(decodedMii, exportFormat) {
 	if (exportFormat === 'PNG_3DS') {
-		const qrData = miijs.encodeMii(
+		const qrData = await miijs.encodeMii(
 			decodedMii,
 			decodedMii?.hasOwnProperty('tl') ? miijs.MiiFormats.TLE : miijs.MiiFormats.CFED
 		);
-		return await miijs.makeQR(qrData);
+		return await miijs.makeQR(qrData, QR_EXPORT_OPTIONS);
 	}
 
 	if (exportFormat === 'PNG_WIIU') {
-		const qrData = miijs.encodeMii(decodedMii, miijs.MiiFormats.FFED);
-		return await miijs.makeQR(qrData);
+		const qrData = await miijs.encodeMii(decodedMii, miijs.MiiFormats.FFED);
+		return await miijs.makeQR(qrData, QR_EXPORT_OPTIONS);
 	}
 
-	return miijs.encodeMii(decodedMii, miijs.MiiFormats[exportFormat]);
+	return await miijs.encodeMii(decodedMii, miijs.MiiFormats[exportFormat]);
 }
 
 function getVisibleExportFormatOptionButtons() {
@@ -506,8 +507,8 @@ document.getElementById("impFile").addEventListener('click',async ()=>{
 			decodedInput = scannedMii;
 		}
 
-		const decodedMii = miijs.decodeMii(decodedInput);
-		const studioMiiData = miijs.encodeMii(decodedMii, miijs.MiiFormats.MNMS).toString('hex');
+		const decodedMii = await miijs.decodeMii(decodedInput);
+		const studioMiiData = (await miijs.encodeMii(decodedMii, miijs.MiiFormats.MNMS)).toString('hex');
 		newMiiStudioDataInput.value = studioMiiData;
 		updateMiiStudioDataButton.click();
 	}
@@ -534,7 +535,7 @@ document.getElementById("download").addEventListener('click',async ()=>{
 			throw new Error(`Unsupported export format: ${exportFormat}`);
 		}
 
-		const decodedMii = miijs.decodeMii(currentMiiData);
+		const decodedMii = await miijs.decodeMii(currentMiiData);
 		const exportedData = await buildExportPayload(decodedMii, exportFormat);
 		triggerFileDownload(
 			`mii.${exportConfig.extension}`,
