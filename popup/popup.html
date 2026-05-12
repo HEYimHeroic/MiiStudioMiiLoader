@@ -6,7 +6,16 @@
 		<link rel="stylesheet" href="popup.css">
 	</head>
 	<body>
-		<a href="https://github.com/HEYimHeroic/MiiStudioMiiLoader" id="gitLink" target="_blank"><img src="https://github.com/favicon.ico" alt="Github"></a>
+		<div class="popup-actions">
+			<button id="theme-toggle" class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Switch to dark mode" title="Switch to dark mode">
+				<span class="theme-toggle-track" aria-hidden="true">
+					<span class="theme-toggle-icon theme-toggle-sun"></span>
+					<span class="theme-toggle-icon theme-toggle-moon"></span>
+					<span class="theme-toggle-thumb"></span>
+				</span>
+			</button>
+			<a href="https://github.com/HEYimHeroic/MiiStudioMiiLoader" id="gitLink" target="_blank" aria-label="Open project on GitHub"><img src="https://github.com/favicon.ico" alt=""></a>
+		</div>
 		<div id="loading">
 			Loading...
 		</div>
@@ -34,7 +43,7 @@
 					<br>
 					<hr>
 
-					<label for="fileUpload"><h3>Import via File:</h3></label> <input type="file" name="fileUpload" id="fileInp">
+					<label for="fileInp"><h3>Import via File:</h3></label> <input type="file" name="fileUpload" id="fileInp">
 					<button id="impFile" type="button">Import</button>
 				</form>
 				<hr>
@@ -53,13 +62,13 @@
 						<option value="CHARINFO">.CHARINFO | Switch/2</option>
 						<option value="PNG_3DS">.PNG | 3DS QR</option>
 						<option value="PNG_WIIU">.PNG | Wii U QR</option>
+						<option value="RCD">.RCD | Wii</option>
+						<option value="CFSD">.CFSD | 3DS</option>
+						<option value="FFSD">.FFSD | Wii U</option>
 						<option value="NFCD">.NFCD | Switch/2</option>
 						<option value="NFSD">.NFSD | Switch/2</option>
 						<option value="FFCD">.FFCD | Wii U</option>
-						<option value="FFSD">.FFSD | Wii U</option>
 						<option value="CFCD">.CFCD | 3DS</option>
-						<option value="CFSD">.CFSD | 3DS</option>
-						<option value="RCD">.RCD | Wii</option>
 						<option value="RSD">.RSD | Wii</option>
 						<option value="NCD">.NCD | DS</option>
 						<option value="NSD">.NSD | DS</option>

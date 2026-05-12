@@ -19,13 +19,65 @@ let exportFormatPanel;
 let exportFormatOptionsContainer;
 let exportFormatSelect;
 let exportFormatOptions = [];
+let themeToggleButton;
 
+const THEME_STORAGE_KEY = 'mii-studio-mii-loader-theme';
 const MII_STUDIO_URL_REGEX = /https:\/\/studio\.mii\.nintendo\.com\/miis\/([a-f0-9]{16})\/edit\?client_id=([a-f0-9]{16})/;
 const IS_HEX_REGEX = /^[a-f\d\s]+$/i;
 const IS_B64_REGEX = /^((([a-z\d+/]{4})*)([a-z\d+/]{4}|[a-z\d+/]{3}=|[a-z\d+/]{2}==))$/i;
 const QR_EXPORT_OPTIONS = { noRenderMii: true };
 
 let miijsPromise;
+
+function getStoredTheme() {
+	const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+	return storedTheme === 'dark' || storedTheme === 'light'
+		? storedTheme
+		: '';
+}
+
+function getPreferredTheme() {
+	const storedTheme = getStoredTheme();
+	if (storedTheme) {
+		return storedTheme;
+	}
+
+	return window.matchMedia?.('(prefers-color-scheme: dark)').matches
+		? 'dark'
+		: 'light';
+}
+
+function applyTheme(theme) {
+	const nextTheme = theme === 'dark' ? 'dark' : 'light';
+	const isDark = nextTheme === 'dark';
+
+	document.documentElement.dataset.theme = nextTheme;
+
+	if (!themeToggleButton) {
+		return;
+	}
+
+	themeToggleButton.setAttribute('aria-checked', String(isDark));
+	themeToggleButton.setAttribute('aria-label', `Switch to ${isDark ? 'light' : 'dark'} mode`);
+	themeToggleButton.title = `Switch to ${isDark ? 'light' : 'dark'} mode`;
+}
+
+function initThemeToggle() {
+	themeToggleButton = document.getElementById('theme-toggle');
+	applyTheme(getPreferredTheme());
+
+	if (!themeToggleButton) {
+		return;
+	}
+
+	themeToggleButton.addEventListener('click', () => {
+		const nextTheme = document.documentElement.dataset.theme === 'dark'
+			? 'light'
+			: 'dark';
+		localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+		applyTheme(nextTheme);
+	});
+}
 
 async function getMiijs() {
 	if (!miijsPromise) {
@@ -376,6 +428,7 @@ function initPopupWheelScrolling() {
 async function initPopup() {
 	loadingDiv = document.querySelector('#loading');
 	notValidURLDiv = document.querySelector('#not-valid-url');
+	initThemeToggle();
 	initExportFormatSearch();
 	initPopupWheelScrolling();
 
