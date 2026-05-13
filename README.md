@@ -26,7 +26,7 @@ To manually install this browser extension, follow these steps:
 1. Download the [latest release](https://github.com/HEYimHeroic/MiiStudioMiiLoader/releases) of the Mii Studio Mii Loader browser extension. Unzip the download to a location you won't lose it, like an extensions folder.
 2. Go to your browser's extensions settings page. For example, on Google Chrome, the link is `chrome://extensions/`, but otherwise accessible through settings for other browsers.
 3. Find the "Developer mode" option (or something similarly named) and enable it.
-4. Click the button to "Load unpacked extension" and navigate to the folder you unzipped (the contents should contain `manifest.json`, `/popup/`, and `/images/`). Choose this folder as the unpacked extension's location.
+4. Click the button to "Load unpacked extension" and navigate to the folder you unzipped (the contents should contain `manifest.json`, `/popup/`, `/images/`, etc.). Choose this folder as the unpacked extension's location.
 
 # Bookmarklet Instructions
 For those still unaware of the browser extension, or for one reason or another need to use the bookmarklet instead, the old bookmarklet version of the tool is still available. Below are the old instructions for that:
