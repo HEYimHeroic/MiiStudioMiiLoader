@@ -14,7 +14,6 @@ let miiStudioStorageKey;
 let miijs;
 let exportFormatDropdown;
 let exportFormatButton;
-let exportFormatSearchInput;
 let exportFormatPanel;
 let exportFormatOptionsContainer;
 let exportFormatSelect;
@@ -25,9 +24,17 @@ const THEME_STORAGE_KEY = 'mii-studio-mii-loader-theme';
 const MII_STUDIO_URL_REGEX = /https:\/\/studio\.mii\.nintendo\.com\/miis\/([a-f0-9]{16})\/edit\?client_id=([a-f0-9]{16})/;
 const IS_HEX_REGEX = /^[a-f\d\s]+$/i;
 const IS_B64_REGEX = /^((([a-z\d+/]{4})*)([a-z\d+/]{4}|[a-z\d+/]{3}=|[a-z\d+/]{2}==))$/i;
-const QR_EXPORT_OPTIONS = { noRenderMii: true };
+const QR_EXPORT_OVERLAY_FRACTION = 0.3;
+const QR_EXPORT_OUTLINE_WIDTH = 4;
+const MII_EXPORT_DEFAULTS = {
+	creatorMac: '732F6D6E6D73',
+	creatorName: 'Mii Loader',
+	name: 'Mii Studio',
+	systemId: '6D69692E746F6F6C'
+};
 
 let miijsPromise;
+let qrIconPromise;
 
 function getStoredTheme() {
 	const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
@@ -42,9 +49,7 @@ function getPreferredTheme() {
 		return storedTheme;
 	}
 
-	return window.matchMedia?.('(prefers-color-scheme: dark)').matches
-		? 'dark'
-		: 'light';
+	return 'light';
 }
 
 function applyTheme(theme) {
@@ -121,14 +126,6 @@ async function setPageLocalStorage(key, value) {
 	}, [key, value]);
 }
 
-function normaliseDropdownFilterText(text) {
-	return text
-		.toLowerCase()
-		.replaceAll('/', ' ')
-		.replace(/\s+/g, ' ')
-		.trim();
-}
-
 function getCurrentStudioMiiData() {
 	return miiStudioMiiDataDiv?.textContent?.trim() ?? '';
 }
@@ -178,21 +175,196 @@ function triggerFileDownload(fileName, data, mimeType) {
 	setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
 }
 
+function withMiiExportDefaults(decodedMii) {
+	const exportMii = structuredClone(decodedMii);
+	exportMii.meta = {
+		...(exportMii.meta ?? {}),
+		...MII_EXPORT_DEFAULTS
+	};
+	return exportMii;
+}
+
+async function getQrIconData() {
+	if (!qrIconPromise) {
+		qrIconPromise = fetch(chrome.runtime.getURL('images/icon-full.png'))
+			.then(response => {
+				if (!response.ok) {
+					throw new Error(`Could not load QR icon: ${response.status}`);
+				}
+
+				return response.arrayBuffer();
+			})
+			.then(arrayBuffer => new Uint8Array(arrayBuffer));
+	}
+
+	return qrIconPromise;
+}
+
+async function getQrExportOptions() {
+	return {
+		image: await getQrIconData(),
+		noRenderMii: true,
+		overlayFrac: QR_EXPORT_OVERLAY_FRACTION
+	};
+}
+
+function getQrModuleBounds(imageData) {
+	let minX = imageData.width;
+	let minY = imageData.height;
+	let maxX = -1;
+	let maxY = -1;
+	const { data, width, height } = imageData;
+
+	for (let y = 0; y < height; y++) {
+		for (let x = 0; x < width; x++) {
+			const offset = (y * width + x) * 4;
+			const alpha = data[offset + 3];
+			const red = data[offset];
+			const green = data[offset + 1];
+			const blue = data[offset + 2];
+
+			if (alpha > 32 && red < 48 && green < 48 && blue < 48) {
+				minX = Math.min(minX, x);
+				minY = Math.min(minY, y);
+				maxX = Math.max(maxX, x);
+				maxY = Math.max(maxY, y);
+			}
+		}
+	}
+
+	if (maxX === -1 || maxY === -1) {
+		return null;
+	}
+
+	return { minX, minY, maxX, maxY };
+}
+
+async function drawQrOutline(qrPngData) {
+	const qrBytes = toUint8Array(qrPngData);
+	const qrBitmap = await createImageBitmap(new Blob([qrBytes], { type: 'image/png' }));
+	const canvas = document.createElement('canvas');
+	canvas.width = qrBitmap.width;
+	canvas.height = qrBitmap.height;
+
+	const context = canvas.getContext('2d');
+	if (!context) {
+		throw new Error('Could not create a canvas context for QR outline.');
+	}
+
+	context.drawImage(qrBitmap, 0, 0);
+
+	const qrBounds = getQrModuleBounds(context.getImageData(0, 0, canvas.width, canvas.height));
+	const minimumQuietZone = qrBounds
+		? Math.min(
+			qrBounds.minX,
+			qrBounds.minY,
+			canvas.width - qrBounds.maxX - 1,
+			canvas.height - qrBounds.maxY - 1
+		)
+		: QR_EXPORT_OUTLINE_WIDTH;
+	const halfLineWidth = QR_EXPORT_OUTLINE_WIDTH / 2;
+	const outlineInset = Math.max(halfLineWidth, minimumQuietZone / 2);
+	const outlineSize = Math.min(canvas.width, canvas.height) - (outlineInset * 2);
+	const outlineOffsetX = (canvas.width - outlineSize) / 2;
+	const outlineOffsetY = (canvas.height - outlineSize) / 2;
+
+	context.strokeStyle = '#000000';
+	context.lineWidth = QR_EXPORT_OUTLINE_WIDTH;
+	context.strokeRect(
+		outlineOffsetX,
+		outlineOffsetY,
+		outlineSize,
+		outlineSize
+	);
+
+	qrBitmap.close?.();
+
+	const outlinedBlob = await new Promise((resolve, reject) => {
+		canvas.toBlob(blob => {
+			if (blob) {
+				resolve(blob);
+				return;
+			}
+
+			reject(new Error('Could not render the outlined QR PNG.'));
+		}, 'image/png');
+	});
+
+	return new Uint8Array(await outlinedBlob.arrayBuffer());
+}
+
+async function convertPngToJpeg(pngData) {
+	const pngBytes = toUint8Array(pngData);
+	const imageBitmap = await createImageBitmap(new Blob([pngBytes], { type: 'image/png' }));
+	const canvas = document.createElement('canvas');
+	canvas.width = imageBitmap.width;
+	canvas.height = imageBitmap.height;
+
+	const context = canvas.getContext('2d');
+	if (!context) {
+		throw new Error('Could not create a canvas context for JPG export.');
+	}
+
+	context.fillStyle = '#ffffff';
+	context.fillRect(0, 0, canvas.width, canvas.height);
+	context.drawImage(imageBitmap, 0, 0);
+	imageBitmap.close?.();
+
+	const jpegBlob = await new Promise((resolve, reject) => {
+		canvas.toBlob(blob => {
+			if (blob) {
+				resolve(blob);
+				return;
+			}
+
+			reject(new Error('Could not convert the QR PNG to JPG.'));
+		}, 'image/jpeg', 0.95);
+	});
+
+	return new Uint8Array(await jpegBlob.arrayBuffer());
+}
+
+async function makeQrExport(qrData) {
+	const qrPng = await miijs.makeQR(qrData, await getQrExportOptions());
+	return await drawQrOutline(qrPng);
+}
+
 async function buildExportPayload(decodedMii, exportFormat) {
-	if (exportFormat === 'PNG_3DS') {
+	const exportMii = withMiiExportDefaults(decodedMii);
+
+	if (exportFormat === 'PNG_3DS' || exportFormat === 'JPG_3DS') {
 		const qrData = await miijs.encodeMii(
-			decodedMii,
-			decodedMii?.hasOwnProperty('tl') ? miijs.MiiFormats.TLE : miijs.MiiFormats.CFED
+			exportMii,
+			exportMii?.hasOwnProperty('tl') ? miijs.MiiFormats.TLE : miijs.MiiFormats.CFED
 		);
-		return await miijs.makeQR(qrData, QR_EXPORT_OPTIONS);
+		const qrPng = await makeQrExport(qrData);
+		return exportFormat === 'JPG_3DS'
+			? await convertPngToJpeg(qrPng)
+			: qrPng;
 	}
 
 	if (exportFormat === 'PNG_WIIU') {
-		const qrData = await miijs.encodeMii(decodedMii, miijs.MiiFormats.FFED);
-		return await miijs.makeQR(qrData, QR_EXPORT_OPTIONS);
+		const qrData = await miijs.encodeMii(exportMii, miijs.MiiFormats.FFED);
+		return await makeQrExport(qrData);
 	}
 
-	return await miijs.encodeMii(decodedMii, miijs.MiiFormats[exportFormat]);
+	return await miijs.encodeMii(exportMii, miijs.MiiFormats[exportFormat]);
+}
+
+function getExportConfig(exportFormat) {
+	const extension = exportFormat.includes("_")
+		? exportFormat.toLowerCase().split("_")[0]
+		: exportFormat.toLowerCase();
+
+	if (extension === 'png') {
+		return { extension, mimeType: 'image/png' };
+	}
+
+	if (extension === 'jpg') {
+		return { extension, mimeType: 'image/jpeg' };
+	}
+
+	return { extension, mimeType: 'application/octet-stream' };
 }
 
 function getVisibleExportFormatOptionButtons() {
@@ -200,7 +372,7 @@ function getVisibleExportFormatOptionButtons() {
 		return [];
 	}
 
-	return Array.from(exportFormatOptionsContainer.querySelectorAll('.searchable-select-option'));
+	return Array.from(exportFormatOptionsContainer.querySelectorAll('.format-select-option'));
 }
 
 function focusExportFormatOption(index) {
@@ -221,7 +393,7 @@ function clearExportFormatOptions() {
 	exportFormatOptionsContainer.replaceChildren();
 }
 
-function closeExportFormatDropdown({ resetFilter = true } = {}) {
+function closeExportFormatDropdown() {
 	if (!exportFormatPanel || !exportFormatButton) {
 		return;
 	}
@@ -229,10 +401,6 @@ function closeExportFormatDropdown({ resetFilter = true } = {}) {
 	exportFormatPanel.hidden = true;
 	exportFormatButton.setAttribute('aria-expanded', 'false');
 	clearExportFormatOptions();
-
-	if (resetFilter && exportFormatSearchInput) {
-		exportFormatSearchInput.value = '';
-	}
 }
 
 function setSelectedExportFormat(value) {
@@ -249,35 +417,19 @@ function setSelectedExportFormat(value) {
 	exportFormatButton.textContent = selectedOption.textContent;
 }
 
-function renderExportFormatOptions(filterText = '') {
+function renderExportFormatOptions() {
 	if (!exportFormatSelect || !exportFormatOptionsContainer) {
 		return;
 	}
 
 	const currentValue = exportFormatSelect.value;
-	const normalisedFilter = normaliseDropdownFilterText(filterText);
-	const matchingOptions = exportFormatOptions.filter(option => {
-		if (!normalisedFilter) {
-			return true;
-		}
-
-		return normaliseDropdownFilterText(option.text).includes(normalisedFilter);
-	});
 
 	exportFormatOptionsContainer.replaceChildren();
 
-	if (matchingOptions.length === 0) {
-		const emptyState = document.createElement('div');
-		emptyState.className = 'searchable-select-empty';
-		emptyState.textContent = 'No formats found.';
-		exportFormatOptionsContainer.appendChild(emptyState);
-		return;
-	}
-
-	for (const option of matchingOptions) {
+	for (const option of exportFormatOptions) {
 		const optionElement = document.createElement('button');
 		optionElement.type = 'button';
-		optionElement.className = 'searchable-select-option';
+		optionElement.className = 'format-select-option';
 		if (option.value === currentValue) {
 			optionElement.classList.add('is-selected');
 		}
@@ -302,7 +454,7 @@ function renderExportFormatOptions(filterText = '') {
 			if (event.key === 'ArrowUp') {
 				event.preventDefault();
 				if (currentIndex <= 0) {
-					exportFormatSearchInput.focus();
+					exportFormatButton.focus();
 					return;
 				}
 				focusExportFormatOption(currentIndex - 1);
@@ -325,15 +477,14 @@ function renderExportFormatOptions(filterText = '') {
 	}
 }
 
-function initExportFormatSearch() {
+function initExportFormatDropdown() {
 	exportFormatDropdown = document.getElementById('export-format-dropdown');
 	exportFormatButton = document.getElementById('export-format-button');
-	exportFormatSearchInput = document.getElementById('export-format-search');
 	exportFormatPanel = document.getElementById('export-format-panel');
 	exportFormatOptionsContainer = document.getElementById('export-format-options');
 	exportFormatSelect = document.getElementById('export-format-select');
 
-	if (!exportFormatDropdown || !exportFormatButton || !exportFormatSearchInput || !exportFormatPanel || !exportFormatOptionsContainer || !exportFormatSelect) {
+	if (!exportFormatDropdown || !exportFormatButton || !exportFormatPanel || !exportFormatOptionsContainer || !exportFormatSelect) {
 		return;
 	}
 
@@ -353,10 +504,10 @@ function initExportFormatSearch() {
 
 		exportFormatPanel.hidden = false;
 		exportFormatButton.setAttribute('aria-expanded', 'true');
-		exportFormatSearchInput.value = '';
 		renderExportFormatOptions();
 		setTimeout(() => {
-			exportFormatSearchInput.focus();
+			const selectedIndex = exportFormatOptions.findIndex(option => option.value === exportFormatSelect.value);
+			focusExportFormatOption(selectedIndex === -1 ? 0 : selectedIndex);
 		}, 0);
 	});
 
@@ -366,23 +517,6 @@ function initExportFormatSearch() {
 			if (exportFormatPanel.hidden) {
 				exportFormatButton.click();
 			}
-		}
-	});
-
-	exportFormatSearchInput.addEventListener('input', event => {
-		renderExportFormatOptions(event.target.value);
-	});
-
-	exportFormatSearchInput.addEventListener('keydown', event => {
-		if (event.key === 'Escape') {
-			closeExportFormatDropdown();
-			exportFormatButton.focus();
-			return;
-		}
-
-		if (event.key === 'ArrowDown') {
-			event.preventDefault();
-			focusExportFormatOption(0);
 		}
 	});
 
@@ -429,7 +563,7 @@ async function initPopup() {
 	loadingDiv = document.querySelector('#loading');
 	notValidURLDiv = document.querySelector('#not-valid-url');
 	initThemeToggle();
-	initExportFormatSearch();
+	initExportFormatDropdown();
 	initPopupWheelScrolling();
 
 	try {
@@ -580,13 +714,7 @@ document.getElementById("download").addEventListener('click',async ()=>{
 		}
 
 		const exportFormat = exportFormatSelect?.value ?? 'MNMS';
-		const exportConfig ={
-			extension: exportFormat.includes("_")?exportFormat.toLowerCase().split("_")[0]:exportFormat.toLowerCase(),
-			mimeType: exportFormat.includes("PNG")?`image/png`:`application/octet-stream`
-		};
-		if (!exportConfig) {
-			throw new Error(`Unsupported export format: ${exportFormat}`);
-		}
+		const exportConfig = getExportConfig(exportFormat);
 
 		const decodedMii = await miijs.decodeMii(currentMiiData);
 		const exportedData = await buildExportPayload(decodedMii, exportFormat);

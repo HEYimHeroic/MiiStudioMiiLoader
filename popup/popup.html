@@ -6,16 +6,6 @@
 		<link rel="stylesheet" href="popup.css">
 	</head>
 	<body>
-		<div class="popup-actions">
-			<button id="theme-toggle" class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Switch to dark mode" title="Switch to dark mode">
-				<span class="theme-toggle-track" aria-hidden="true">
-					<span class="theme-toggle-icon theme-toggle-sun"></span>
-					<span class="theme-toggle-icon theme-toggle-moon"></span>
-					<span class="theme-toggle-thumb"></span>
-				</span>
-			</button>
-			<a href="https://github.com/HEYimHeroic/MiiStudioMiiLoader" id="gitLink" target="_blank" aria-label="Open project on GitHub"><img src="https://github.com/favicon.ico" alt=""></a>
-		</div>
 		<div id="loading">
 			Loading...
 		</div>
@@ -30,48 +20,54 @@
 				<h2>Could not find Mii data in local storage. Make and revert an edit to your Mii and try again.</h2>
 			</div>
 			<div class="content" hidden>
+				<div class="popup-actions">
+					<button id="theme-toggle" class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Switch to dark mode" title="Switch to dark mode">
+						<span class="theme-toggle-track" aria-hidden="true">
+							<span class="theme-toggle-icon theme-toggle-sun"></span>
+							<span class="theme-toggle-icon theme-toggle-moon"></span>
+							<span class="theme-toggle-thumb"></span>
+						</span>
+					</button>
+					<a href="https://github.com/HEYimHeroic/MiiStudioMiiLoader" id="gitLink" target="_blank" aria-label="Open project on GitHub"><img src="https://github.com/favicon.ico" alt=""></a>
+				</div>
 				<h3>Current Mii:</h3>
 				<code id="mii-data"></code>
-				<button id="copyHex">Copy as Hex</button> <button id="copyB64">Copy as Base64</button>
+				<div class="copy-actions">
+					<button id="copyHex">Copy as Hex</button>
+					<button id="copyB64">Copy as Base64</button>
+				</div>
 
 				<hr>
 
-				<h3>Import via Code:</h3>
+				<h3>Import via Mii Studio Code:</h3>
 				<form>
 					<input type="text" id="new-mii-studio-data" name="hex" placeholder="Hex or Base64 Code...">
-					<button id="update-mii-studio-data" type="button">Import via Hex/Base64</button><br>
-					<br>
+					<button id="update-mii-studio-data" type="button">Import via Hex/Base64</button>
 					<hr>
 
-					<label for="fileInp"><h3>Import via File:</h3></label> <input type="file" name="fileUpload" id="fileInp">
+					<label for="fileInp"><h3>Import via File:</h3></label>
+					<input type="file" name="fileUpload" id="fileInp">
 					<button id="impFile" type="button">Import</button>
 				</form>
 				<hr>
 				<h3>Export to File</h3>
 				<button id="download">Download</button>
-				<div class="searchable-select" id="export-format-dropdown">
-					<button type="button" id="export-format-button" class="searchable-select-trigger" aria-haspopup="listbox" aria-expanded="false">
+				<div class="format-select" id="export-format-dropdown">
+					<button type="button" id="export-format-button" class="format-select-trigger" aria-haspopup="listbox" aria-expanded="false">
 						.MNMS | Mii Studio
 					</button>
-					<div class="searchable-select-panel" id="export-format-panel" hidden>
-						<input type="search" id="export-format-search" placeholder="Search export formats..." autocomplete="off">
-						<div class="searchable-select-options" id="export-format-options" role="listbox"></div>
+					<div class="format-select-panel" id="export-format-panel" hidden>
+						<div class="format-select-options" id="export-format-options" role="listbox"></div>
 					</div>
 					<select id="export-format-select" hidden>
 						<option value="MNMS">.MNMS | Mii Studio</option>
 						<option value="CHARINFO">.CHARINFO | Switch/2</option>
-						<option value="PNG_3DS">.PNG | 3DS QR</option>
-						<option value="PNG_WIIU">.PNG | Wii U QR</option>
-						<option value="RCD">.RCD | Wii</option>
-						<option value="CFSD">.CFSD | 3DS</option>
-						<option value="FFSD">.FFSD | Wii U</option>
 						<option value="NFCD">.NFCD | Switch/2</option>
-						<option value="NFSD">.NFSD | Switch/2</option>
-						<option value="FFCD">.FFCD | Wii U</option>
-						<option value="CFCD">.CFCD | 3DS</option>
-						<option value="RSD">.RSD | Wii</option>
+						<option value="PNG_3DS">.PNG | 3DS/Wii U QR</option>
+						<option value="JPG_3DS">.JPG | 3DS/Wii U QR</option>
+						<option value="CFCD">.CFSD/.FFSD | 3DS/Wii U (ver3)</option>
+						<option value="RCD">.RCD | Wii</option>
 						<option value="NCD">.NCD | DS</option>
-						<option value="NSD">.NSD | DS</option>
 					</select>
 				</div>
 			</div>
