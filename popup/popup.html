@@ -1,27 +1,75 @@
-<html>
-	<link rel="stylesheet" href="popup.css">
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Mii Studio Mii Loader</title>
+		<link rel="stylesheet" href="popup.css">
+	</head>
 	<body>
 		<div id="loading">
 			Loading...
 		</div>
-		<div id="not-valid-url" class="hidden">
-			<h2>Please visit the Mii Studio, then edit a Mii to continue. https://my.nintendo.com/mii</h2>
+		<div id="not-valid-url" hidden>
+			<h2>Please visit <a href="https://my.nintendo.com/mii" target="_blank">the Mii Studio</a>, then edit a Mii to continue.</h2>
 		</div>
-		<div id="mii-studio" class="hidden">
-			<div id="no-mii-id-or-client-id" class="hidden">
+		<div id="mii-studio" hidden>
+			<div id="no-mii-id-or-client-id" hidden>
 				<h2>Could not find Mii ID and/or client ID in the URL. Close and revisit the page and try again.</h2>
 			</div>
-			<div id="no-mii-data-warning" class="hidden">
+			<div id="no-mii-data-warning" hidden>
 				<h2>Could not find Mii data in local storage. Make and revert an edit to your Mii and try again.</h2>
 			</div>
-			<div class="content hidden">
-				<h2>Current Mii Studio code</h2>
-				<h2>
-					<code id="mii-data"></code>
-				</h2>
-				<input type="text" id="new-mii-studio-data">
-				<br>
-				<button id="update-mii-studio-data">Update Mii Studio Data</button>
+			<div class="content" hidden>
+				<div class="popup-actions">
+					<button id="theme-toggle" class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Switch to dark mode" title="Switch to dark mode">
+						<span class="theme-toggle-track" aria-hidden="true">
+							<span class="theme-toggle-icon theme-toggle-sun"></span>
+							<span class="theme-toggle-icon theme-toggle-moon"></span>
+							<span class="theme-toggle-thumb"></span>
+						</span>
+					</button>
+					<a href="https://github.com/HEYimHeroic/MiiStudioMiiLoader" id="gitLink" target="_blank" aria-label="Open project on GitHub"><img src="https://github.com/favicon.ico" alt=""></a>
+				</div>
+				<h3>Current Mii:</h3>
+				<code id="mii-data"></code>
+				<div class="copy-actions">
+					<button id="copyHex">Copy as Hex</button>
+					<button id="copyB64">Copy as Base64</button>
+				</div>
+
+				<hr>
+
+				<h3>Import via Mii Studio Code:</h3>
+				<form>
+					<input type="text" id="new-mii-studio-data" name="hex" placeholder="Hex or Base64 Code...">
+					<button id="update-mii-studio-data" type="button">Import via Hex/Base64</button>
+					<hr>
+
+					<label for="fileInp"><h3>Import via File:</h3></label>
+					<input type="file" name="fileUpload" id="fileInp">
+					<button id="impFile" type="button">Import</button>
+				</form>
+				<hr>
+				<h3>Export to File</h3>
+				<button id="download">Download</button>
+				<div class="format-select" id="export-format-dropdown">
+					<button type="button" id="export-format-button" class="format-select-trigger" aria-haspopup="listbox" aria-expanded="false">
+						.MNMS | Mii Studio
+					</button>
+					<div class="format-select-panel" id="export-format-panel" hidden>
+						<div class="format-select-options" id="export-format-options" role="listbox"></div>
+					</div>
+					<select id="export-format-select" hidden>
+						<option value="MNMS">.MNMS | Mii Studio</option>
+						<option value="CHARINFO">.CHARINFO | Switch/2</option>
+						<option value="NFCD">.NFCD | Switch/2</option>
+						<option value="PNG_3DS">.PNG | 3DS/Wii U QR</option>
+						<option value="JPG_3DS">.JPG | 3DS/Wii U QR</option>
+						<option value="CFCD">.CFSD/.FFSD | 3DS/Wii U (ver3)</option>
+						<option value="RCD">.RCD | Wii</option>
+						<option value="NCD">.NCD | DS</option>
+					</select>
+				</div>
 			</div>
 		</div>
 		<script src="popup.js"></script>

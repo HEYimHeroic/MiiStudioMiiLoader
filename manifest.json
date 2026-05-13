@@ -4,7 +4,7 @@
 	"description": "Load and export Mii Studio codes on the Mii Studio website: https://my.nintendo.com/mii",
 	"version": "1.0.3",
 	"homepage_url": "https://github.com/HEYimHeroic/MiiStudioMiiLoader",
-	"permissions": ["storage", "activeTab", "scripting"],
+	"permissions": ["storage", "activeTab", "scripting", "clipboardWrite"],
 	"icons": {
 		"16": "images/icon-16.png",
 		"32": "images/icon-32.png",
