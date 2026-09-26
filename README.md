@@ -12,7 +12,7 @@ To load a Mii Studio code, begin editing a Mii the same way as before, but now w
 
 ## New Features
 
-Thanks to a huge overhaul from [Kestron06](https://github.com/Kestron06), the Mii Studio Mii Loader browser extension now has several new features. The Mii Studio code can now be copied with a single click, along with Base64 encode support. Additionally, the extension can also convert Mii data file formats, allowing imports and exports of .mnms (My Nintendo Mii Studio data), .charinfo (Switch/2), .nfcd/.nfsd (Switch/2), .png and .jpg (for ver3 QR codes), .cfcd/.cfsd/.ffcd/.ffsd (3DS/Wii U/ver3), .rcd/.rsd (Wii), and .ncd/.nsd (DS) files.
+Thanks to a huge overhaul from [Kestron06](https://github.com/Kestron06), the Mii Studio Mii Loader browser extension now has several new features. The Mii Studio code can now be copied with a single click, along with Base64 encode support. Additionally, the extension can also convert Mii data file formats, allowing imports and exports of .fsdex (amiibo/Switch 2 QR codes, also backwards compatible as ver3 QR codes) .mnms (My Nintendo Mii Studio data), .charinfo (Switch/2), .nfcd/.nfsd (Switch/2), .png and .jpg (for .FSDEX QR codes), .cfcd/.cfsd/.ffcd/.ffsd (3DS/Wii U/ver3), .rcd/.rsd (Wii), and .ncd/.nsd (DS) files.
 
 All can be imported and converted into a Mii Studio code instantly, and all can be exported by the extension converting the Mii Studio code into the respective data. It's now easier than ever to manage your Miis in the Mii Studio!
 
