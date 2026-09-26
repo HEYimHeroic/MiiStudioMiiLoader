@@ -21,11 +21,12 @@ let exportFormatOptions = [];
 let themeToggleButton;
 
 const THEME_STORAGE_KEY = 'mii-studio-mii-loader-theme';
-const MII_STUDIO_URL_REGEX = /https:\/\/studio\.mii\.nintendo\.com\/miis\/([a-f0-9]{16})\/edit\?client_id=([a-f0-9]{16})/;
+const PAGE_REQUEST = 'mii-studio-mii-loader:page';
 const IS_HEX_REGEX = /^[a-f\d\s]+$/i;
 const IS_B64_REGEX = /^((([a-z\d+/]{4})*)([a-z\d+/]{4}|[a-z\d+/]{3}=|[a-z\d+/]{2}==))$/i;
 const QR_EXPORT_OVERLAY_FRACTION = 0.3;
 const QR_EXPORT_OUTLINE_WIDTH = 4;
+const QR_EXPORT_MARGIN = 48;
 const MII_EXPORT_DEFAULTS = {
 	creatorMac: '732F6D6E6D73',
 	creatorName: 'Mii Loader',
@@ -102,28 +103,12 @@ async function getCurrentTab() {
 	return tab;
 }
 
-async function executeOnCurrentTab(func, args = []) {
-	const [{ result }] = await chrome.scripting.executeScript({
-		args,
-		target: {
-			tabId: currentTab.id
-		},
-		func
-	});
-
-	return result;
-}
-
-async function getPageLocalStorage(key) {
-	return executeOnCurrentTab(function(storageKey) {
-		return localStorage.getItem(storageKey);
-	}, [key]);
-}
-
 async function setPageLocalStorage(key, value) {
-	await executeOnCurrentTab(function(storageKey, storageValue) {
-		localStorage.setItem(storageKey, storageValue);
-	}, [key, value]);
+	const response = await chrome.tabs.sendMessage(currentTab.id,
+		{ type: PAGE_REQUEST, action: 'write', key, value });
+	if (response?.status !== 'written') {
+		throw new Error(`Could not update this Mii: ${response?.status ?? 'no response'}`);
+	}
 }
 
 function getCurrentStudioMiiData() {
@@ -204,7 +189,8 @@ async function getQrExportOptions() {
 	return {
 		image: await getQrIconData(),
 		noRenderMii: true,
-		overlayFrac: QR_EXPORT_OVERLAY_FRACTION
+		overlayFrac: QR_EXPORT_OVERLAY_FRACTION,
+		margin: QR_EXPORT_MARGIN
 	};
 }
 
@@ -293,37 +279,6 @@ async function drawQrOutline(qrPngData) {
 	return new Uint8Array(await outlinedBlob.arrayBuffer());
 }
 
-async function convertPngToJpeg(pngData) {
-	const pngBytes = toUint8Array(pngData);
-	const imageBitmap = await createImageBitmap(new Blob([pngBytes], { type: 'image/png' }));
-	const canvas = document.createElement('canvas');
-	canvas.width = imageBitmap.width;
-	canvas.height = imageBitmap.height;
-
-	const context = canvas.getContext('2d');
-	if (!context) {
-		throw new Error('Could not create a canvas context for JPG export.');
-	}
-
-	context.fillStyle = '#ffffff';
-	context.fillRect(0, 0, canvas.width, canvas.height);
-	context.drawImage(imageBitmap, 0, 0);
-	imageBitmap.close?.();
-
-	const jpegBlob = await new Promise((resolve, reject) => {
-		canvas.toBlob(blob => {
-			if (blob) {
-				resolve(blob);
-				return;
-			}
-
-			reject(new Error('Could not convert the QR PNG to JPG.'));
-		}, 'image/jpeg', 0.95);
-	});
-
-	return new Uint8Array(await jpegBlob.arrayBuffer());
-}
-
 async function makeQrExport(qrData) {
 	const qrPng = await miijs.makeQR(qrData, await getQrExportOptions());
 	return await drawQrOutline(qrPng);
@@ -332,19 +287,8 @@ async function makeQrExport(qrData) {
 async function buildExportPayload(decodedMii, exportFormat) {
 	const exportMii = withMiiExportDefaults(decodedMii);
 
-	if (exportFormat === 'PNG_3DS' || exportFormat === 'JPG_3DS') {
-		const qrData = await miijs.encodeMii(
-			exportMii,
-			exportMii?.hasOwnProperty('tl') ? miijs.MiiFormats.TLE : miijs.MiiFormats.CFED
-		);
-		const qrPng = await makeQrExport(qrData);
-		return exportFormat === 'JPG_3DS'
-			? await convertPngToJpeg(qrPng)
-			: qrPng;
-	}
-
-	if (exportFormat === 'PNG_WIIU') {
-		const qrData = await miijs.encodeMii(exportMii, miijs.MiiFormats.FFED);
+	if (exportFormat === 'PNG_ALL') {
+		const qrData = await miijs.encodeMii(exportMii, miijs.MiiFormats.FEDEX);
 		return await makeQrExport(qrData);
 	}
 
@@ -568,13 +512,30 @@ async function initPopup() {
 
 	try {
 		currentTab = await getCurrentTab();
-
-		if (!MII_STUDIO_URL_REGEX.test(currentTab?.url ?? '')) {
+		if (!Number.isInteger(currentTab?.id)) {
+			notValidURLDiv.hidden = false;
+			return;
+		}
+		let page;
+		try {
+			page = await chrome.tabs.sendMessage(currentTab.id, { type: PAGE_REQUEST, action: 'read' });
+		} catch {
 			notValidURLDiv.hidden = false;
 			return;
 		}
 
-		await initMiiStudio();
+		if (page?.status === 'new') {
+			notValidURLDiv.querySelector('h2').textContent = 'The Mii must be saved once before we can process it.';
+			notValidURLDiv.hidden = false;
+			return;
+		}
+
+		if (page?.status === 'wrong-page') {
+			notValidURLDiv.hidden = false;
+			return;
+		}
+
+		await initMiiStudio(page);
 	}
 	catch (error) {
 		console.error('Failed to initialize popup', error);
@@ -604,7 +565,7 @@ else {
 	initPopup();
 }
 
-async function initMiiStudio() {
+async function initMiiStudio(page) {
 	miiStudioDiv = document.querySelector('#mii-studio');
 	miiStudioNoMiiIDOrClientIDWarningDiv = miiStudioDiv.querySelector('#no-mii-id-or-client-id');
 	miiStudioNoMiiDataWarningDiv = miiStudioDiv.querySelector('#no-mii-data-warning');
@@ -615,22 +576,18 @@ async function initMiiStudio() {
 
 	miiStudioDiv.hidden=false;
 
-	const regexResult = MII_STUDIO_URL_REGEX.exec(currentTab.url);
-
-	if (regexResult.length !== 3) {
+	if (page?.status === 'missing-id') {
 		miiStudioNoMiiIDOrClientIDWarningDiv.hidden=false;
 		return;
 	}
-
-	const [, miiStudioMiiID, miiStudioClientID] = regexResult;
-	miiStudioStorageKey = `https%3A%2F%2Fstudio.mii.nintendo.com%2Fmiis%2F${miiStudioMiiID}%2Fedit%3Fclient_id%3D${miiStudioClientID}`;
-
-	const miiData = await getPageLocalStorage(miiStudioStorageKey);
-
-	if (!miiData) {
+	if (page?.status === 'missing-data') {
 		miiStudioNoMiiDataWarningDiv.hidden=false;
 		return;
 	}
+	if (page?.status !== 'ready' || typeof page.key !== 'string' || typeof page.data !== 'string') {
+		throw new Error(`Unexpected page response: ${page?.status ?? 'no response'}`);
+	}
+	miiStudioStorageKey = page.key;
 
 	miiStudioContentDiv.querySelector('form')?.addEventListener('submit', event => {
 		event.preventDefault();
@@ -638,7 +595,7 @@ async function initMiiStudio() {
 
 	miiStudioContentDiv.hidden=false;
 
-	miiStudioMiiDataDiv.textContent = miiData;
+	miiStudioMiiDataDiv.textContent = page.data;
 	updateMiiStudioDataButton.addEventListener('click', updateMiiStudioData);
 }
 
